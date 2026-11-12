@@ -50,8 +50,9 @@ class FolderBrowser extends Component
     {
         $folder = Folder::findOrFail($folderId);
 
-        // User hanya bisa browse subfolder dari folder yang diakses
-        if (! auth()->user()->canAccessFolder($this->getAncestorAccessFolder($folder))) {
+        // Aturan akses tunggal: canAccessFolder sudah menelusuri leluhur,
+        // jadi subfolder dari folder yang di-assign ikut lolos.
+        if (! auth()->user()->canAccessFolder($folder)) {
             abort(403);
         }
 
@@ -74,12 +75,18 @@ class FolderBrowser extends Component
 
     public function openPreview(string $fileId): void
     {
-        $file = File::findOrFail($fileId);
+        $file = File::with('folder')->findOrFail($fileId);
 
-        // Pastikan file ada di folder yang diakses user
+        // Pastikan file ada di folder yang diakses user. canAccessFolder()
+        // sudah menelusuri leluhur, jadi subfolder ikut lolos.
         if (! auth()->user()->canAccessFolder($file->folder)) {
             abort(403);
         }
+
+        // Modal pratinjau memuat PDF lewat route preview, tetapi pencatatan di
+        // sini memastikan klik pratinjau tetap terekam walau PDF gagal dimuat.
+        app(\App\Services\DocumentAccessLogger::class)
+            ->record($file, auth()->user(), \App\Services\DocumentAccessLogger::EVENT_PREVIEW);
 
         $this->previewFile = $file;
         $this->showPreview = true;
@@ -101,25 +108,4 @@ class FolderBrowser extends Component
     }
 
     // ─── Private ─────────────────────────────────────────────────────────────
-
-    /**
-     * Ambil ancestor folder yang di-assign langsung ke user (untuk cek akses).
-     */
-    private function getAncestorAccessFolder(Folder $folder): Folder
-    {
-        $accessibleIds = auth()->user()
-            ->accessibleFolders()
-            ->pluck('folders.id')
-            ->toArray();
-
-        $current = $folder;
-        while ($current) {
-            if (in_array($current->id, $accessibleIds)) {
-                return $current;
-            }
-            $current = $current->parent;
-        }
-
-        return $folder; // fallback (akan gagal di canAccessFolder)
-    }
 }

@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+    // Dark mode dikendalikan class `dark` di <html> (lihat public/js/theme.js).
+    darkMode: 'class',
     content: [
         './resources/**/*.blade.php',
         './resources/**/*.js',

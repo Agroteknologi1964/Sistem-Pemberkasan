@@ -1,0 +1,19 @@
+# Build output & dependency lokal — tidak perlu masuk image
+/node_modules
+/public/build
+/public/hot
+/storage/*.key
+/storage/logs/*
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/app/documents/*
+/vendor
+.env
+.env.backup
+.env.*.bak.*
+.phpunit.result.cache
+docker-compose.override.yml
+certbot
+.DS_Store
+*.log

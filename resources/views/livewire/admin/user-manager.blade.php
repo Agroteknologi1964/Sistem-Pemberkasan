@@ -3,8 +3,8 @@
     {{-- Header --}}
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-lg font-semibold text-gray-900">Manajemen User</h1>
-            <p class="text-sm text-gray-500">User yang ditambahkan akan otomatis mendapat folder penyimpanan.</p>
+            <h1 class="text-lg font-semibold text-gray-900 dark:text-slate-100">Manajemen User</h1>
+            <p class="text-sm text-gray-500 dark:text-slate-400">User yang ditambahkan akan otomatis mendapat folder penyimpanan.</p>
         </div>
         <button wire:click="openCreateModal"
                 class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
@@ -16,10 +16,10 @@
     <div class="relative">
         <input wire:model.live.debounce.300ms="search" type="search"
                placeholder="Cari nama atau email..."
-               class="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+               class="w-full rounded-lg border border-gray-300 dark:border-slate-700 py-2.5 pl-10 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
         
         {{-- Icon Search --}}
-        <div class="absolute left-3 top-2.5 text-gray-400">
+        <div class="absolute left-3 top-2.5 text-gray-400 dark:text-slate-500">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
@@ -27,27 +27,27 @@
     </div>
 
     {{-- Tabel --}}
-    <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
         <table class="w-full text-sm">
-            <thead class="bg-gray-50 border-b border-gray-200">
+            <thead class="bg-gray-50 dark:bg-slate-900/60 border-b border-gray-200 dark:border-slate-800">
                 <tr>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500">Nama</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500">Email</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500">Folder Asli</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500">Status</th>
-                    <th class="px-4 py-3 text-left font-medium text-gray-500">Aksi</th>
+                    <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-slate-400">Nama</th>
+                    <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-slate-400">Email</th>
+                    <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-slate-400">Folder Asli</th>
+                    <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-slate-400">Status</th>
+                    <th class="px-4 py-3 text-left font-medium text-gray-500 dark:text-slate-400">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
                 @forelse($users as $user)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-4 py-3 font-medium text-gray-900">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-slate-800 dark:bg-slate-900/60 transition-colors">
+                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-slate-100">
                             {{ $user->name }}
                             @if($user->force_change_password)
                                 <span class="ml-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">Wajib ganti password</span>
                             @endif
                         </td>
-                        <td class="px-4 py-3 text-gray-600">{{ $user->email }}</td>
+                        <td class="px-4 py-3 text-gray-600 dark:text-slate-300">{{ $user->email }}</td>
                         <td class="px-4 py-3">
                             @if($user->rootFolder)
                                 <a href="{{ route('admin.folders.show', $user->rootFolder->id) }}"
@@ -59,24 +59,24 @@
                                     {{ $user->rootFolder->name }}
                                 </a>
                             @else
-                                <span class="text-gray-400 text-xs">—</span>
+                                <span class="text-gray-400 dark:text-slate-500 text-xs">—</span>
                             @endif
                         </td>
                         <td class="px-4 py-3">
                             <button wire:click="toggleActive('{{ $user->id }}')"
                                     class="rounded-full px-2.5 py-0.5 text-xs font-medium transition
-                                           {{ $user->is_active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200' }}">
+                                           {{ $user->is_active ? 'bg-green-100 text-green-700 dark:text-emerald-300 hover:bg-green-200' : 'bg-red-100 text-red-700 dark:text-red-300 hover:bg-red-200' }}">
                                 {{ $user->is_active ? 'Aktif' : 'Nonaktif' }}
                             </button>
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-2">
                                 <button wire:click="openEditModal('{{ $user->id }}')"
-                                        class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">
+                                        class="rounded-lg border border-gray-300 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 dark:bg-slate-900/60">
                                     Edit
                                 </button>
                                 <button wire:click="confirmDelete('{{ $user->id }}')"
-                                        class="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50">
+                                        class="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:bg-red-500/10">
                                     Hapus
                                 </button>
                             </div>
@@ -84,7 +84,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-12 text-center text-gray-400">
+                        <td colspan="5" class="px-4 py-12 text-center text-gray-400 dark:text-slate-500">
                             Tidak ada user ditemukan.
                         </td>
                     </tr>
@@ -92,7 +92,7 @@
             </tbody>
         </table>
 
-        <div class="border-t border-gray-100 px-4 py-3">
+        <div class="border-t border-gray-100 dark:border-slate-800 px-4 py-3">
             {{ $users->links() }}
         </div>
     </div>
@@ -100,37 +100,37 @@
     {{-- Modal: Tambah/Edit User --}}
     @if($showModal)
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-        <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-            <h2 class="mb-5 text-base font-semibold text-gray-900">
+        <div class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-xl">
+            <h2 class="mb-5 text-base font-semibold text-gray-900 dark:text-slate-100">
                 {{ $isEditing ? 'Edit User' : 'Tambah User Baru' }}
             </h2>
 
             <div class="space-y-4">
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                    <input wire:model.defer="name" type="text" placeholder="Nama lengkap user"
-                           class="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
-                    @error('name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-200">Nama Lengkap</label>
+                    <input wire:model="name" type="text" placeholder="Nama lengkap user"
+                           class="w-full rounded-lg border border-gray-300 dark:border-slate-700 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                    @error('name') <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700">Email</label>
-                    <input wire:model.defer="email" type="email" placeholder="email@contoh.com"
-                           class="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
-                    @error('email') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-200">Email</label>
+                    <input wire:model="email" type="email" placeholder="email@contoh.com"
+                           class="w-full rounded-lg border border-gray-300 dark:border-slate-700 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                    @error('email') <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-200">
                         Password {{ $isEditing ? '(kosongkan jika tidak diubah)' : '' }}
                     </label>
-                    <input wire:model.defer="password" type="password" placeholder="Min. 8 karakter"
-                           class="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
-                    @error('password') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                    <input wire:model="password" type="password" placeholder="Min. 8 karakter"
+                           class="w-full rounded-lg border border-gray-300 dark:border-slate-700 px-3.5 py-2.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200" />
+                    @error('password') <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p> @enderror
                 </div>
 
                 @if(!$isEditing)
-                    <p class="flex items-start text-xs text-gray-500">
+                    <p class="flex items-start text-xs text-gray-500 dark:text-slate-400">
                         {{-- Icon Lightbulb --}}
                         <svg class="mr-1.5 mt-0.5 h-4 w-4 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.82 1.508-2.316a7.5 7.5 0 10-7.516 0c.85.496 1.508 1.333 1.508 2.316V18" />
@@ -142,7 +142,7 @@
 
             <div class="mt-5 flex justify-end gap-2">
                 <button wire:click="$set('showModal', false)"
-                        class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        class="rounded-lg border border-gray-300 dark:border-slate-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 dark:bg-slate-900/60">
                     Batal
                 </button>
                 <button wire:click="save"
@@ -163,20 +163,20 @@
     {{-- Modal: Konfirmasi Hapus User --}}
     @if($showDeleteConfirm)
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-        <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl text-center">
+        <div class="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-xl text-center">
             <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
                 {{-- Icon Warning / Exclamation --}}
-                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
             </div>
-            <h2 class="text-base font-semibold text-gray-900">Hapus User?</h2>
-            <p class="mt-2 text-sm text-gray-500">
+            <h2 class="text-base font-semibold text-gray-900 dark:text-slate-100">Hapus User?</h2>
+            <p class="mt-2 text-sm text-gray-500 dark:text-slate-400">
                 Seluruh folder dan file milik user ini akan ikut terhapus secara permanen. Tindakan ini tidak dapat dibatalkan.
             </p>
             <div class="mt-5 flex gap-2">
                 <button wire:click="$set('showDeleteConfirm', false)"
-                        class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        class="flex-1 rounded-lg border border-gray-300 dark:border-slate-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 dark:bg-slate-900/60">
                     Batal
                 </button>
                 <button wire:click="deleteUser"

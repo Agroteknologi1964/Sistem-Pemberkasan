@@ -14,8 +14,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class File extends Model
 {
     use HasFactory, HasUuids, SoftDeletes, LogsActivity;
-    
-    protected $guarded = [];   
 
     protected $fillable = [
         'folder_id',

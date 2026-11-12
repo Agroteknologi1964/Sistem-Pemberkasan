@@ -162,8 +162,13 @@ class FolderManager extends Component
 
     public function saveUpload(): void
     {
+        // Validasi 3 lapis: mimes:pdf (ekstensi+guessed mime) lalu cek magic bytes
+        // di FileService::upload(), dan batas ukuran dari config.
+        $maxKb = (int) config('app.max_file_size', 20480);
+
         $this->validate([
-            'uploadFile' => 'required|file|mimes:pdf|max:20480',
+            'uploadFile' => 'required|file|mimes:pdf|max:' . $maxKb,
+            'uploadName' => 'nullable|string|max:180',
         ]);
 
         if (! $this->currentFolder) {

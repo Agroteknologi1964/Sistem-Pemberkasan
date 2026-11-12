@@ -1,1 +1,6 @@
 *.sqlite*
+.env..bak
+.env.docker-template*
+*.bak
+backup/
+certbot/

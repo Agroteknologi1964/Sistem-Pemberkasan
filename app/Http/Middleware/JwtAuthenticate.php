@@ -71,6 +71,8 @@ class JwtAuthenticate
             minutes: config('jwt.ttl', 1440),
             path: '/',
             domain: null,
+            // Paksa Secure saat APP_ENV=production meski diakses lewat HTTP,
+            // agar token tidak pernah terkirim tanpa TLS.
             secure: app()->isProduction(),
             httpOnly: true,
             sameSite: 'lax',

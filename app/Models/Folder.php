@@ -16,8 +16,6 @@ class Folder extends Model
 {
     use HasFactory, HasUuids, SoftDeletes, LogsActivity;
 
-    protected $guarded = [];    
-
     protected $fillable = [
         'name',
         'parent_id',

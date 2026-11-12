@@ -26,11 +26,18 @@ return Application::configure(basePath: dirname(__DIR__))
             'role'        => CheckRole::class,
             'guest.jwt'   => \App\Http\Middleware\RedirectIfAuthenticated::class,
             'force.pass'  => ForceChangePassword::class,
+            'jwt.fresh'   => \App\Http\Middleware\RejectTokensIssuedBeforePasswordChange::class,
         ]);
 
         // Middleware global yang jalan di semua request web
         $middleware->web(append: [
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            \App\Http\Middleware\SecurityHeaders::class,
+        ]);
+
+        // API dipakai untuk integrasi JWT; header keamanan juga wajib.
+        $middleware->api(append: [
+            \App\Http\Middleware\SecurityHeaders::class,
         ]);
 
     })

@@ -30,6 +30,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Batas Upload Dokumen
+    |--------------------------------------------------------------------------
+    |
+    | Dibaca oleh FileService dan validasi Livewire. Satuan KB.
+    | Nilai ini WAJIB <= upload_max_filesize & post_max_size di php.ini,
+    | dan <= client_max_body_size di Nginx (lihat deploy/nginx.conf).
+    |
+    */
+
+    'max_file_size' => env('MAX_FILE_SIZE', 20480),
+
+    'allowed_mimes' => env('ALLOWED_MIMES', 'pdf'),
+
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Debug Mode
     |--------------------------------------------------------------------------
     |

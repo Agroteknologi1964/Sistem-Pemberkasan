@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Skema & Flow — Sistem Pemberkasan</title>
+<style>
+  /* ══ PALET GELAP PEKAT ══════════════════════════════════════════════ */
+  :root{
+    --bg-page:   #070b14;
+    --bg-panel:  #0d1424;
+    --bg-raise:  #141e33;
+    --line:      #22304d;
+    --fg:        #eaf0ff;
+    --fg-dim:    #93a7c9;
+    --acc:       #7c9cff;
+    --amber:     #ffc94d;
+    --cyan:      #4dd9ff;
+    --pink:      #ff7ac8;
+    --violet:    #b388ff;
+    --mint:      #4ef0b0;
+    --red:       #ff6b81;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  body{
+    margin:0;padding:26px 30px 52px;
+    background:
+      radial-gradient(1100px 520px at 12% -10%, rgba(124,156,255,.13), transparent 68%),
+      radial-gradient(900px 480px at 92% 4%, rgba(179,136,255,.10), transparent 70%),
+      var(--bg-page);
+    color:var(--fg);
+    font-family:var(--app-font,Inter,system-ui,-apple-system,"Segoe UI",sans-serif);
+    font-size:14px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1{font-size:21px;font-weight:680;margin:0 0 5px;letter-spacing:-.015em;
+     background:linear-gradient(92deg,#eaf0ff 8%,var(--acc) 55%,var(--violet) 96%);
+     -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--fg-dim);font-size:12.5px;margin-bottom:20px}
+
+  .tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:18px;
+        border-bottom:1px solid var(--line);padding-bottom:0}
+  .tab{
+    appearance:none;border:0;background:transparent;cursor:pointer;
+    padding:9px 15px;font-size:13px;font-weight:550;font-family:inherit;
+    color:var(--fg-dim);
+    border-bottom:2px solid transparent;margin-bottom:-1px;
+    transition:color .15s,border-color .15s;
+  }
+  .tab:hover{color:var(--fg)}
+  .tab[aria-selected="true"]{
+    color:var(--acc);
+    border-bottom-color:var(--acc);
+    text-shadow:0 0 18px rgba(124,156,255,.55);
+  }
+  .panel{display:none;animation:fade .22s ease}
+  .panel.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* ── ERD ─────────────────────────────────────────────────────────── */
+  .erd{display:flex;flex-direction:column;gap:18px}
+  .erd-row{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+  .entity{
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:linear-gradient(180deg,var(--bg-raise),var(--bg-panel));
+    box-shadow:0 1px 0 rgba(255,255,255,.045) inset, 0 8px 22px -14px rgba(0,0,0,.9);
+    min-width:228px;overflow:hidden;flex:0 0 auto;
+  }
+  .entity>header{
+    padding:8px 12px;font-weight:650;font-size:12.5px;letter-spacing:.03em;
+    text-transform:uppercase;
+    background:rgba(124,156,255,.10);
+    border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;gap:8px;
+  }
+  .entity>header .tbl{font-weight:500;text-transform:none;letter-spacing:0;
+    opacity:.65;font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .entity ul{list-style:none;margin:0;padding:7px 0}
+  .entity li{
+    padding:2.5px 12px;font-size:12.5px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    display:flex;justify-content:space-between;gap:14px;align-items:baseline;
+  }
+  .entity li .t{color:var(--fg-dim);font-size:11px;
+    font-family:inherit;flex:0 0 auto}
+  .pk{color:var(--amber);font-weight:600}
+  .fk{color:var(--cyan)}
+  .uq{color:var(--pink)}
+  .sw{color:var(--violet)}
+  .meta{font-size:11.5px;color:var(--fg-dim);
+        padding:0 12px 9px;font-style:italic}
+  .entity.accent{border-color:rgba(124,156,255,.45)}
+  .entity.accent>header{background:linear-gradient(90deg,rgba(124,156,255,.24),rgba(179,136,255,.13))}
+  .entity.accent{box-shadow:0 0 0 1px rgba(124,156,255,.16), 0 10px 30px -18px rgba(124,156,255,.75)}
+
+  .rel{
+    display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+    font-size:12.5px;color:var(--fg-dim);
+    padding-left:2px;
+  }
+  .rel code{
+    background:rgba(143,163,199,.13);padding:1.5px 6px;border-radius:4px;
+    font-size:11.5px;color:#cfe0ff;border:1px solid rgba(143,163,199,.10);
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  .badge{display:inline-block;padding:1px 7px;border-radius:999px;
+    font-size:10.5px;font-weight:600;letter-spacing:.02em;
+    background:rgba(124,156,255,.14);color:var(--acc);white-space:nowrap}
+  .badge.warn{background:rgba(255,201,77,.13);color:var(--amber)}
+  .badge.ok{background:rgba(78,240,176,.13);color:var(--mint)}
+  .badge.err{background:rgba(255,107,129,.13);color:var(--red)}
+
+  /* ── FLOW ────────────────────────────────────────────────────────── */
+  .flow{display:flex;flex-direction:column;gap:0;max-width:840px}
+  .step{
+    display:flex;gap:14px;position:relative;padding-bottom:16px;
+  }
+  .step:last-child{padding-bottom:0}
+  .step::before{
+    content:"";position:absolute;left:13px;top:28px;bottom:0;width:1.5px;
+    background:linear-gradient(to bottom,var(--line),transparent);
+  }
+  .step:last-child::before{display:none}
+  .num{
+    flex:0 0 27px;height:27px;border-radius:50%;
+    display:grid;place-items:center;font-size:11.5px;font-weight:700;
+    background:rgba(124,156,255,.18);color:var(--acc);
+    border:1px solid rgba(124,156,255,.38);z-index:1;
+    box-shadow:0 0 14px -3px rgba(124,156,255,.6);
+  }
+  .step.ok .num{background:rgba(78,240,176,.14);color:var(--mint);border-color:rgba(78,240,176,.36)}
+  .step.bad .num{background:rgba(255,107,129,.13);color:var(--red);border-color:rgba(255,107,129,.34)}
+  .step .body{flex:1;padding-top:3px;min-width:0}
+  .step .title{font-weight:600;font-size:13.5px;margin-bottom:2px}
+  .step .desc{font-size:12.5px;color:var(--fg-dim)}
+  .step .where{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;
+    color:#a8c0ff;background:rgba(124,156,255,.14);
+    border:1px solid rgba(124,156,255,.22);
+    padding:1px 6px;border-radius:4px;margin-left:6px;white-space:nowrap;
+  }
+
+  /* ── TABLE ───────────────────────────────────────────────────────── */
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+  th,td{text-align:left;padding:8px 11px;border-bottom:1px solid var(--line);
+        vertical-align:top}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+     color:var(--fg-dim);font-weight:600;
+     background:linear-gradient(180deg,rgba(124,156,255,.10),rgba(143,163,199,.03));
+     border-bottom:1px solid var(--line)}
+  td code{background:rgba(143,163,199,.11);padding:1px 5px;border-radius:4px;
+    font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  tr:last-child td{border-bottom:0}
+  .yes{color:var(--mint);font-weight:600}
+  .no{color:var(--red);font-weight:600}
+
+  h2{font-size:14px;font-weight:650;margin:22px 0 8px}
+  h2:first-child{margin-top:0}
+  .note{
+    border-left:2.5px solid rgba(255,201,77,.45);background:rgba(255,201,77,.06);
+    padding:9px 13px;border-radius:0 7px 7px 0;font-size:12.5px;margin:12px 0;
+    color:var(--fg-dim);
+  }
+  .note strong{color:var(--amber);font-weight:600}
+  .note.danger{border-left-color:rgba(255,107,129,.45);background:rgba(255,107,129,.06)}
+  .note.danger strong{color:var(--red)}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11.5px;
+    color:var(--fg-dim);margin-top:14px;
+    padding-top:12px;border-top:1px solid var(--line)}
+  .legend span{display:flex;align-items:center;gap:5px}
+  .dot{width:7px;height:7px;border-radius:2px;display:inline-block}
+
+  .stack{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+         gap:10px;margin-top:10px}
+  .card{
+    border:1px solid var(--line);border-radius:9px;
+    padding:11px 13px;background:var(--bg-raise);
+  }
+  .card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--fg-dim);font-weight:600;margin-bottom:3px}
+  .card .v{font-size:12.5px;font-weight:550}
+</style>
+</head>
+<body>
+
+<h1>Skema &amp; Flow — Sistem Pemberkasan</h1>
+<div class="sub">Arsitektur nyata dari kode di <code style="font-size:11.5px">D:\External\PartTime\Sistem-Pemberkasan</code> — bukan rancangan ideal.</div>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" aria-selected="true" data-p="erd">1 · Skema Database</button>
+  <button class="tab" role="tab" aria-selected="false" data-p="auth">2 · Alur Login (JWT)</button>
+  <button class="tab" role="tab" aria-selected="false" data-p="access">3 · Hak Akses Folder</button>
+  <button class="tab" role="tab" aria-selected="false" data-p="upload">4 · Alur Upload</button>
+  <button class="tab" role="tab" aria-selected="false" data-p="stack">5 · Stack Teknis</button>
+</div>
+
+<!-- ══════════════════ 1. ERD ══════════════════ -->
+<div class="panel on" id="erd">
+  <div class="erd">
+
+    <div class="erd-row">
+      <div class="entity accent">
+        <header>users <span class="tbl">uuid</span></header>
+        <ul>
+          <li><span class="pk">id</span><span class="t">uuid · PK</span></li>
+          <li><span>name</span><span class="t">string</span></li>
+          <li><span class="uq">email</span><span class="t">string · UNIQUE</span></li>
+          <li><span>password</span><span class="t">hashed</span></li>
+          <li><span>role</span><span class="t">admin | user</span></li>
+          <li><span>is_active</span><span class="t">bool · dflt true</span></li>
+          <li><span>force_change_password</span><span class="t">bool · dflt true</span></li>
+          <li><span class="sw">deleted_at</span><span class="t">soft delete</span></li>
+        </ul>
+      </div>
+
+      <div class="entity accent">
+        <header>folders <span class="tbl">uuid</span></header>
+        <ul>
+          <li><span class="pk">id</span><span class="t">uuid · PK</span></li>
+          <li><span>name</span><span class="t">string</span></li>
+          <li><span class="fk">parent_id</span><span class="t">uuid · self-ref</span></li>
+          <li><span class="fk">user_id</span><span class="t">uuid · owner</span></li>
+          <li><span>is_root</span><span class="t">bool</span></li>
+          <li><span>order</span><span class="t">int · dflt 0</span></li>
+          <li><span class="sw">deleted_at</span><span class="t">soft delete</span></li>
+        </ul>
+      </div>
+
+      <div class="entity accent">
+        <header>files <span class="tbl">uuid</span></header>
+        <ul>
+          <li><span class="pk">id</span><span class="t">uuid · PK</span></li>
+          <li><span class="fk">folder_id</span><span class="t">uuid</span></li>
+          <li><span>name</span><span class="t">alias tampilan</span></li>
+          <li><span>original_name</span><span class="t">nama asli</span></li>
+          <li><span>path</span><span class="t">storage relatif</span></li>
+          <li><span>mime_type</span><span class="t">application/pdf</span></li>
+          <li><span>size</span><span class="t">bigint · bytes</span></li>
+          <li><span class="fk">uploaded_by</span><span class="t">uuid</span></li>
+          <li><span class="sw">deleted_at</span><span class="t">soft delete</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="rel">
+      <span class="badge">pivot</span>
+      <strong style="color:var(--fg)">folder_user</strong>
+      <code>folder_id</code> + <code>user_id</code>
+      <span>→ PK gabungan, cascade delete</span>
+      <span class="badge ok">memberi akses</span>
+    </div>
+
+    <div class="erd-row">
+      <div class="entity">
+        <header>activity_log <span class="tbl">spatie</span></header>
+        <ul>
+          <li><span class="pk">id</span><span class="t">bigint · PK</span></li>
+          <li><span>log_name</span><span class="t">string</span></li>
+          <li><span>description</span><span class="t">text</span></li>
+          <li><span>subject_type / _id</span><span class="t">polymorphic</span></li>
+          <li><span>causer_type / _id</span><span class="t">siapa pelakunya</span></li>
+          <li><span>event</span><span class="t">created/updated/deleted</span></li>
+          <li><span>properties</span><span class="t">json · old→new</span></li>
+          <li><span>batch_uuid</span><span class="t">uuid</span></li>
+        </ul>
+        <div class="meta">Mencatat semua model via LogsActivity</div>
+      </div>
+
+      <div class="entity">
+        <header>sessions <span class="tbl">laravel</span></header>
+        <ul>
+          <li><span class="pk">id</span><span class="t">string · PK</span></li>
+          <li><span class="fk">user_id</span><span class="t">uuid · nullable</span></li>
+          <li><span>ip_address</span><span class="t">varchar 45</span></li>
+          <li><span>user_agent</span><span class="t">text</span></li>
+          <li><span>payload</span><span class="t">longtext</span></li>
+          <li><span>last_activity</span><span class="t">int</span></li>
+        </ul>
+        <div class="meta">Saat produksi pakai Redis, tabel ini tidak dipakai</div>
+      </div>
+
+      <div class="entity">
+        <header>password_reset_tokens</header>
+        <ul>
+          <li><span class="pk">email</span><span class="t">string · PK</span></li>
+          <li><span>token</span><span class="t">string</span></li>
+          <li><span>created_at</span><span class="t">timestamp</span></li>
+        </ul>
+        <div class="meta">Ada di migrasi, belum dipakai fitur apa pun</div>
+      </div>
+    </div>
+
+    <div class="rel" style="margin-top:4px">
+      <strong style="color:var(--fg)">Relasi:</strong>
+      <span><code>users</code> 1 ──▶ ∞ <code>folders</code> (owner, cascade)</span>
+      <span>·</span>
+      <span><code>folders</code> 1 ──▶ ∞ <code>folders</code> (parent_id, self-ref)</span>
+      <span>·</span>
+      <span><code>folders</code> 1 ──▶ ∞ <code>files</code> (cascade)</span>
+      <span>·</span>
+      <span><code>users</code> ∞ ──▶ ∞ <code>folders</code> (folder_user)</span>
+    </div>
+
+    <div class="note danger">
+      <strong>Temuan skema:</strong> <code>folders.user_id</code> memakai <code>onDelete('cascade')</code>
+      <em>dan</em> soft delete. Karena cascade hanya jalan pada hard delete, folder user yang di-soft-delete
+      tetap utuh. Tapi bila admin melakukan <code>forceDelete</code> user, seluruh folder ikut terhapus
+      keras — termasuk file fisiknya lewat <code>UserObserver::forceDeleted()</code>. Tidak ada undo.
+    </div>
+    <div class="note">
+      <strong>Tanpa unique index:</strong> <code>folder_user</code> sudah aman (PK gabungan),
+      tapi <code>folders(parent_id, name)</code> tidak unik — dua subfolder boleh bernama sama dalam satu parent.
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><span class="dot" style="background:var(--amber)"></span>Primary key</span>
+    <span><span class="dot" style="background:var(--cyan)"></span>Foreign key</span>
+    <span><span class="dot" style="background:var(--pink)"></span>Unique</span>
+    <span><span class="dot" style="background:var(--violet)"></span>Soft delete</span>
+  </div>
+</div>
+
+<!-- ══════════════════ 2. AUTH FLOW ══════════════════ -->
+<div class="panel" id="auth">
+  <h2>Login &amp; siklus JWT</h2>
+  <div class="flow">
+    <div class="step">
+      <div class="num">1</div>
+      <div class="body">
+        <div class="title">GET / menerima request <span class="where">routes/web.php</span></div>
+        <div class="desc">Route <code>/</code> tidak punya controller — langsung <code>redirect()->route('login')</code>. Inilah sebab halaman welcome Laravel tidak pernah tampil.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">2</div>
+      <div class="body">
+        <div class="title">Middleware berlapis: security → throttle → guest.jwt <span class="where">bootstrap/app.php</span></div>
+        <div class="desc">Header keamanan dipasang dulu, lalu <code>throttle:login-page</code> (30 req/menit per IP), lalu <code>RedirectIfAuthenticated</code> yang membaca cookie <code>jwt_token</code>. Kalau token masih valid → langsung ke dashboard sesuai role.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <div class="body">
+        <div class="title">Halaman login tampil <span class="where">resources/views/auth/login.blade.php</span></div>
+        <div class="desc">Form POST ke <code>login.post</code> dengan CSRF token. Di titik ini tema gelap/terang sudah dipasang oleh <code>theme.js</code> sebelum paint.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">4</div>
+      <div class="body">
+        <div class="title">POST /login — throttle:login <span class="where">SecurityServiceProvider</span></div>
+        <div class="desc">Kunci rate limit: <code>email(case-insensitive) + IP</code>. Maks <strong>5 percobaan/menit</strong>. Percobaan ke-6 → 302 + pesan error, atau <strong>429</strong> bila request JSON (API).</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">5</div>
+      <div class="body">
+        <div class="title">LoginRequest memvalidasi input <span class="where">app/Http/Requests/Auth/LoginRequest.php</span></div>
+        <div class="desc">Email wajib format valid &amp; maks 255 char, password min 6 karakter. Gagal → balik ke form dengan pesan Indonesia.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">6</div>
+      <div class="body">
+        <div class="title">JWTAuth::attempt() membuat token <span class="where">AuthController::login</span></div>
+        <div class="desc">Token ditandatangani HS256 dengan <code>JWT_SECRET</code> (64 char). <strong>Kalau secret kosong → exception "Secret is not set"</strong> — persis error yang Anda temui saat seeding.</div>
+      </div>
+    </div>
+    <div class="step bad">
+      <div class="num">✕</div>
+      <div class="body">
+        <div class="title">Cabang gagal: akun nonaktif</div>
+        <div class="desc"><code>is_active = false</code> → token langsung di-<em>invalidate</em> (masuk blacklist) dan user dikembalikan ke form dengan pesan "Akun Anda tidak aktif."</div>
+      </div>
+    </div>
+    <div class="step ok">
+      <div class="num">✓</div>
+      <div class="body">
+        <div class="title">Sukses: token disimpan di cookie HttpOnly <span class="where">JwtAuthenticate::makeJwtCookie</span></div>
+        <div class="desc">Cookie <code>jwt_token</code>, <code>HttpOnly</code> (tidak bisa dibaca JavaScript), <code>SameSite=Lax</code>, dan <strong>Secure otomatis</strong> saat <code>APP_ENV=production</code>. Masa berlaku = <code>JWT_TTL</code> (1440 menit / 24 jam).</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">7</div>
+      <div class="body">
+        <div class="title">Redirect sesuai role <span class="where">redirectByRole()</span></div>
+        <div class="desc">Admin → <code>/admin/dashboard</code>. User → <code>/user/folders/{rootFolder}</code>. User tanpa root folder akan kena 404 dengan pesan hubungi admin.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">8</div>
+      <div class="body">
+        <div class="title">Setiap request berikutnya: JwtAuthenticate <span class="where">app/Http/Middleware/JwtAuthenticate.php</span></div>
+        <div class="desc">Baca cookie → kalau <code>TokenExpiredException</code>, otomatis <code>refresh()</code> dan pasang cookie baru (sliding session). Kalau token invalid → hapus cookie + redirect ke login.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">9</div>
+      <div class="body">
+        <div class="title">Auto-refresh di background <span class="where">layout app.blade.php</span></div>
+        <div class="desc">Setiap <strong>20 menit</strong>, browser memanggil <code>POST /auth/refresh</code> agar pengguna tidak tiba-tiba ter-logout saat sedang mengisi form.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">10</div>
+      <div class="body">
+        <div class="title">Logout → token di-blacklist <span class="where">AuthController::logout</span></div>
+        <div class="desc"><code>JWTAuth::invalidate()</code> memasukkan token ke blacklist (karena <code>JWT_BLACKLIST_ENABLED=true</code>) sehingga tidak bisa dipakai ulang, lalu cookie dihapus dengan <code>Max-Age=0</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Middleware berurutan pada /admin/*</h2>
+  <table>
+    <thead><tr><th>Urutan</th><th>Middleware</th><th>Fungsi</th><th>Gagal →</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>web</code> group</td><td>Session, CSRF, cookie</td><td>419</td></tr>
+      <tr><td>2</td><td><code>SecurityHeaders</code></td><td>CSP, X-Frame-Options, dll</td><td>—</td></tr>
+      <tr><td>3</td><td><code>JwtAuthenticate</code></td><td>Validasi cookie JWT</td><td>302 → /login</td></tr>
+      <tr><td>4</td><td><code>role:admin</code></td><td>Cek <code>users.role</code></td><td>403</td></tr>
+      <tr><td>5</td><td><code>force.pass</code></td><td>Wajib ganti password (khusus user)</td><td>302 → /profile/password</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ══════════════════ 3. ACCESS ══════════════════ -->
+<div class="panel" id="access">
+  <h2>Bagaimana akses folder ditentukan</h2>
+  <div class="flow">
+    <div class="step ok">
+      <div class="num">A</div>
+      <div class="body">
+        <div class="title">Admin — selalu punya akses penuh</div>
+        <div class="desc"><code>User::canAccessFolder()</code> langsung <code>return true</code> jika <code>role === 'admin'</code>. Admin melihat semua folder lewat query <code>Folder::whereNull('parent_id')</code>.</div>
+      </div>
+    </div>
+    <div class="step ok">
+      <div class="num">B</div>
+      <div class="body">
+        <div class="title">User — hanya folder yang di-assign di pivot</div>
+        <div class="desc"><code>canAccessFolder()</code> mengecek <code>folder_user</code>. Saat user dibuat, <code>UserObserver</code> otomatis membuat root folder bernama sama dengan user dan meng-attach-nya.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">C</div>
+      <div class="body">
+        <div class="title">Navigasi ke subfolder memakai <code>getAncestorAccessFolder()</code></div>
+        <div class="desc">User bisa menembus subfolder, sub-subfolder, dst. — tetapi <em>hanya</em> selama ada ancestor yang di-assign langsung. Middleman ini menelusuri <code>parent</code> berantai sampai ketemu ID yang ada di pivot.</div>
+      </div>
+    </div>
+    <div class="step bad">
+      <div class="num">!</div>
+      <div class="body">
+        <div class="title">Celah: akses tidak berantai ke bawah secara eksplisit</div>
+        <div class="desc">Assign ke folder induk = otomatis bisa ke semua anaknya. Tapi tidak ada cara memberi akses ke subfolder <em>tanpa</em> memberi akses ke induknya — di UI admin, pilihan hanya per folder.</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Matriks izin per aksi</h2>
+  <table>
+    <thead><tr><th>Aksi</th><th>Admin</th><th>User (assigned)</th><th>User (tidak assigned)</th></tr></thead>
+    <tbody>
+      <tr><td>Lihat daftar root folder</td><td class="yes">Ya</td><td class="no">Tidak</td><td class="no">Tidak</td></tr>
+      <tr><td>Browse folder + subfolder</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">403</td></tr>
+      <tr><td>Preview PDF inline</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">403</td></tr>
+      <tr><td>Download PDF</td><td class="yes">Ya</td><td class="yes">Ya</td><td class="no">403</td></tr>
+      <tr><td>Buat / rename folder</td><td class="yes">Ya</td><td class="no">Tidak</td><td class="no">Tidak</td></tr>
+      <tr><td>Upload PDF</td><td class="yes">Ya</td><td class="no">Tidak</td><td class="no">Tidak</td></tr>
+      <tr><td>Hapus file / folder</td><td class="yes">Ya</td><td class="no">Tidak</td><td class="no">Tidak</td></tr>
+      <tr><td>Assign akses ke user</td><td class="yes">Ya</td><td class="no">Tidak</td><td class="no">Tidak</td></tr>
+      <tr><td>Kelola user (CRUD)</td><td class="yes">Ya</td><td class="no">Tidak</td><td class="no">Tidak</td></tr>
+      <tr><td>Lihat activity log</td><td class="yes">Ya</td><td class="no">Tidak</td><td class="no">Tidak</td></tr>
+      <tr><td>Ganti password sendiri</td><td class="no">Tidak ada UI</td><td class="yes">Ya</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Catatan:</strong> User <em>tidak bisa</em> upload sendiri — hanya admin yang mengunggah.
+    Artinya sistem ini adalah <em>distribusi dokumen satu arah</em>, bukan kolaborasi.
+    Kalau nanti user perlu mengumpulkan berkas, itu perubahan alur yang cukup besar.
+  </div>
+</div>
+
+<!-- ══════════════════ 4. UPLOAD ══════════════════ -->
+<div class="panel" id="upload">
+  <h2>Alur upload PDF (admin saja)</h2>
+  <div class="flow">
+    <div class="step">
+      <div class="num">1</div>
+      <div class="body">
+        <div class="title">Admin membuka modal upload <span class="where">FolderManager::openUploadModal</span></div>
+        <div class="desc">Folder tujuan = folder yang sedang dibuka. Kalau belum memilih folder, upload ditolak dengan pesan "Pilih folder tujuan terlebih dahulu."</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">2</div>
+      <div class="body">
+        <div class="title">Lapis 1 — validasi Livewire <span class="where">saveUpload()</span></div>
+        <div class="desc"><code>required|file|mimes:pdf|max:{MAX_FILE_SIZE}</code>. Batas dibaca dari <code>config('app.max_file_size')</code> yang kini benar-benar terhubung ke <code>.env</code>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <div class="body">
+        <div class="title">Lapis 2 — cek isi file (magic bytes) <span class="where">FileService::upload</span></div>
+        <div class="desc">Membaca 1024 byte pertama, wajib mengandung <code>%PDF-</code>. Ini menutup celah file berbahaya yang dinamai <code>.pdf</code> agar lolos <code>mimes:pdf</code>.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">4</div>
+      <div class="body">
+        <div class="title">Lapis 3 — batas ukuran di dua level <span class="where">php.ini + nginx.conf</span></div>
+        <div class="desc">Rantai harus konsisten: <code>MAX_FILE_SIZE=20480</code> (20 MB) ≤ <code>upload_max_filesize 20M</code> ≤ <code>client_max_body_size 24M</code>. Kalau Nginx lebih kecil, upload besar ditolak sebelum sampai ke PHP dengan error 413.</div>
+      </div>
+    </div>
+    <div class="step ok">
+      <div class="num">✓</div>
+      <div class="body">
+        <div class="title">Simpan ke storage tanpa memuat ke RAM <span class="where">writeStream()</span></div>
+        <div class="desc">Path dibuat <code>documents/{folder_id}/{uuid}.pdf</code> — nama asli tidak pernah dipakai di disk, jadi tidak ada path traversal. <code>writeStream()</code> menggantikan <code>file_get_contents()</code> yang dulu berisiko OOM di RAM 2 GB.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">5</div>
+      <div class="body">
+        <div class="title">Verifikasi file benar-benar ada, baru catat ke DB</div>
+        <div class="desc">Kalau <code>exists()</code> gagal, lempar exception — lebih baik error jelas daripada baris database tanpa file.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">6</div>
+      <div class="body">
+        <div class="title">Nama tampilan disanitasi &amp; dipotong 180 char</div>
+        <div class="desc">Karakter selain huruf/angka/spasi/titik/strip dibuang. Kosong → fallback <code>"dokumen"</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Alur akses file saat dibuka</h2>
+  <div class="flow" style="margin-top:6px">
+    <div class="step">
+      <div class="num">→</div>
+      <div class="body">
+        <div class="title">GET /user/files/{id}/preview atau /download <span class="where">FileController</span></div>
+        <div class="desc"><code>File::findOrFail()</code> → <code>canAccessFolder($file->folder)</code> → 403 bila tidak berhak. File <strong>tidak</strong> disajikan langsung dari <code>public/</code>, jadi URL storage tidak bisa ditebak.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="num">→</div>
+      <div class="body">
+        <div class="title">Stream dengan header aman <span class="where">FileService::stream</span></div>
+        <div class="desc"><code>Content-Disposition</code> disanitasi (cegah header injection lewat nama file), <code>X-Content-Type-Options: nosniff</code>, dan nama UTF-8 dikirim lewat <code>filename*=</code> sesuai RFC 6266.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <strong>Sisa risiko:</strong> PDF asli masih bisa mengandung JavaScript berbahaya (PDF aktif).
+    Untuk dokumen dari pihak luar, pertimbangkan menonaktifkan preview inline dan selalu memaksa
+    <code>attachment</code> (download), atau menjalankan PDF melalui sanitizer.
+  </div>
+</div>
+
+<!-- ══════════════════ 5. STACK ══════════════════ -->
+<div class="panel" id="stack">
+  <h2>Komponen yang dipakai</h2>
+  <div class="stack">
+    <div class="card"><div class="k">Framework</div><div class="v">Laravel 11.54</div></div>
+    <div class="card"><div class="k">PHP</div><div class="v">8.2 (^8.2)</div></div>
+    <div class="card"><div class="k">Komponen UI</div><div class="v">Livewire 3</div></div>
+    <div class="card"><div class="k">Auth</div><div class="v">tymon/jwt-auth 2.1</div></div>
+    <div class="card"><div class="k">Audit</div><div class="v">spatie/activitylog 4.8</div></div>
+    <div class="card"><div class="k">CSS</div><div class="v">Tailwind 3 (CDN)</div></div>
+    <div class="card"><div class="k">Database</div><div class="v">MySQL 8</div></div>
+    <div class="card"><div class="k">Deploy</div><div class="v">Docker + Nginx + Redis</div></div>
+  </div>
+
+  <h2>Peta halaman</h2>
+  <table>
+    <thead><tr><th>URL</th><th>Komponen</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>/</code></td><td>redirect → /login</td><td>—</td></tr>
+      <tr><td><code>/login</code></td><td>AuthController@showLogin</td><td>guest</td></tr>
+      <tr><td><code>/admin/dashboard</code></td><td>Livewire Admin\Dashboard</td><td>admin</td></tr>
+      <tr><td><code>/admin/folders</code></td><td>Livewire Admin\FolderManager</td><td>admin</td></tr>
+      <tr><td><code>/admin/users</code></td><td>Livewire Admin\UserManager</td><td>admin</td></tr>
+      <tr><td><code>/admin/activity-logs</code></td><td>Livewire Admin\ActivityLog</td><td>admin</td></tr>
+      <tr><td><code>/user/dashboard</code></td><td>redirect → root folder</td><td>user</td></tr>
+      <tr><td><code>/user/folders/{id}</code></td><td>Livewire User\FolderBrowser</td><td>user</td></tr>
+      <tr><td><code>/user/profile/password</code></td><td>Livewire User\ChangePassword</td><td>user</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Simpan di mana saat produksi</h2>
+  <div class="stack">
+    <div class="card"><div class="k">Dokumen PDF</div><div class="v">Volume Docker <code>documents</code></div></div>
+    <div class="card"><div class="k">Database</div><div class="v">Volume Docker <code>db-data</code></div></div>
+    <div class="card"><div class="k">Session &amp; cache</div><div class="v">Redis (RAM)</div></div>
+    <div class="card"><div class="k">LOG</div><div class="v">stderr → <code>docker compose logs</code></div></div>
+  </div>
+
+  <div class="note">
+    <strong>Catatan Tailwind di CDN:</strong> layout memakai <code>cdn.tailwindcss.com</code>, bukan build Vite.
+    Praktis untuk pengembangan, tetapi di produksi menambah satu request eksternal dan bergantung pada
+    ketersediaan CDN. Build Vite sudah saya siapkan dan terverifikasi (<code>npm run build</code>), tinggal
+    tukar satu baris di layout saat Anda siap.
+  </div>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.setAttribute('aria-selected', 'false'));
+    panels.forEach(p => p.classList.remove('on'));
+    t.setAttribute('aria-selected', 'true');
+    document.getElementById(t.dataset.p).classList.add('on');
+  }));
+</script>
+</body>
+</html>
