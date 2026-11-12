@@ -59,9 +59,7 @@ Akun default setelah seed:
 
 | Role | Email | Password |
 |---|---|---|
-| Admin | admin@pemberkasan.test | admin123 |
-| User | budi@example.test | password123 |
-| User | siti@example.test | password123 |
+| Admin | admin@agrotek.com | Agr0t3knologi123 |
 
 ### 5. Link storage
 
