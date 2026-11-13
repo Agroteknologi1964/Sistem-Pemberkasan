@@ -21,7 +21,7 @@ class ChangePassword extends Component
     public bool $success = false;
 
     /**
-     * Kebijakan password: minimal 10 karakter, wajib huruf besar+kecil dan
+     * Kebijakan password: minimal 8 karakter, wajib huruf besar+kecil dan
      * angka, serta ditolak bila pernah bocor di internet.
      *
      * Untuk arsip surat yang bersifat kredensial, password 8 karakter tanpa
@@ -39,7 +39,7 @@ class ChangePassword extends Component
                 // saat API pwnedpasswords tidak bisa dihubungi, sehingga
                 // password lemah tetap lolos. NotCommonPassword memeriksa
                 // secara lokal tanpa ketergantungan jaringan.
-                Password::min(10)->letters()->mixedCase()->numbers(),
+                Password::min(8)->letters()->mixedCase()->numbers(),
                 new NotCommonPassword(),
             ],
             'password_confirmation' => ['required', 'string'],
@@ -49,7 +49,7 @@ class ChangePassword extends Component
     public function messages(): array
     {
         return [
-            'password.min'           => 'Password baru minimal 10 karakter.',
+            'password.min'           => 'Password baru minimal 8 karakter.',
             'password.letters'       => 'Password harus mengandung huruf.',
             'password.mixed'         => 'Password harus mengandung huruf besar dan kecil.',
             'password.numbers'       => 'Password harus mengandung angka.',
